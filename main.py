@@ -1,183 +1,242 @@
-from collections import defaultdict
-from time import sleep
-from csv import reader, DictReader
-from pyfiglet import figlet_format
-from trivia import *
+import time
+import random
 
-def theme():
-    print("""
-   ._________________.
-   |.---------------.|
-   ||     STAR      ||
-   ||   -._ .-.     ||
-   ||   -._| | |    ||
-   ||   -._|"|"|    ||
-   ||   -._|.-.|    ||
-   ||_______________||
-   /.-.-.-.-.-.-.-.-.\
-  /.-.-.-.-.-.-.-.-.-.\
- /.-.-.-.-.-.-.-.-.-.-.\
-/______/__________\___o_\ 
-\_______________________/
-""")
+#Colores y formatos
+#Para aplicarlos poner un + junto con la variable
 
-def murci():
-    """Un adorable murciélago para decorar."""
-    return "/|\ ^._.^ /|\\"
+#Texto
 
-def timer_3():
-    """Timer simple de 3 segundos."""
-    print("Prepárense en 3...")
-    sleep(1)
-    print("2...")
-    sleep(1)
-    print("1...")
-    sleep(1)
+BLACK = '\033[30m'
+RED = '\033[31m'
+GREEN = '\033[32m'
+YELLOW = '\033[33m'
+BLUE = '\033[34m'
+MAGENTA = '\033[35m'
+CYAN = '\033[36m'
+WHITE = '\033[37m'
+RESET = '\033[39m'
 
-def timer_60():
-    """Timer de 60 segundos para cada pregunta. Interrumpirlo con CTRL + C"""
-    while True:
-        try:
-            print("¡Comenzamos!")
-            print("\nPresionen CTRL+C si adivinan o se rinden.")
-            sleep(20)
-            print("\nQuedan 40 segundos...")
-            sleep(20)
-            print("\nSolo 20 más...")
-            sleep(10)
-            print("\n10 segunditos...")
-            sleep(3)
-            print("\n7 segundos...")
-            sleep(4)
-            print("\n3...")
-            sleep(1)
-            print("\n2...")
-            sleep(1)
-            print("\n1...")
-            sleep(1)
-            print("\nSe terminó el tiempo.")
-            break
-        except KeyboardInterrupt:
-            break
+#Fondo
+F_BLACK = '\033[40m'
+F_RED = '\033[41m'
+F_GREEN = '\033[42m'
+F_YELLOW = '\033[43m'
+F_BLUE = '\033[44m'
+F_MAGENTA = '\033[45m'
+F_CYAN = '\033[46m'
+F_WHITE = '\033[47m'
+F_RESET = '\033[49m'
 
-def adivinaron():
-    """Función para confirmar si el equipo adivinó la respuesta"""
-    print("\n¿Adivinaron?")
-    response = ''
-    while response.lower() not in {"s", "n"}:
-        response = input('Solo ingresa "s" o "n": ')
-    return response
+#Formatos
+NEGRITA = '\033[1m'
+DEBIL = '\033[2m'
+CURSIVA = '\033[3m'
+SUBRAYADO = '\033[4m'
+OCULTO = '\033[6m'
+TACHADO = '\033[7m'
+FRESET = '\033[0m'
 
-def leer_preguntas(archivo):
-    """Función para leer archivo CSV"""
-    with open(archivo, "r", encoding="utf-8") as file:
-        trivia_dict = DictReader(file)
-        return list(trivia_dict)
+RC = NEGRITA + GREEN + "\nRespuesta correcta:" + RESET
+RI = NEGRITA + RED + "\nRespuesta incorrecta:" + RESET
 
+#PUNTAJE
+puntaje = random.randint(5, 11)  #Numeos aleatorios
+iniciar_trivia = True  # Iniciamos la variable en True
+intentos = 0
 
-def cantidad_equipos():
-    """Función para crear equipos y presentarlos"""
-    while True:
-        try:
-            n_equipos = int(input("\n¿Cuántos equipos jugarán? "))
-            break
-        except ValueError:
-            print("\nIngresa un número válido.\n")
-    sleep(1)
-    print("\nBien, serán entonces...\n")
-    sleep(1)
-    print(f"¡{n_equipos} equipos! \(^-^)/")
-    sleep(1)
-    equipos = [] # Lista con nombres de los equipos 
-    for i in range(1, n_equipos+1):
-        name = input(f"\nIngresa el nombre del equipo {i}: ")
-        nuevo_equipo = Team(name, i)
-        equipos.append(nuevo_equipo)
-        sleep(1)
-    print("\nPresentando los siguientes equipos:\n")
-    for e in equipos:
-        sleep(1)
-        print(figlet_format(e.nombre))
-        print(murci() * 4)
-    return equipos
+#INTRODUCTION
+print(MAGENTA + "Hola! bienvenidos al primer desafio de preguntas\n" + RESET)
+time.sleep(1)
 
+nombre = input(BLUE + "¿Cómo quieres que te llame?: " + RESET)
 
-def mostrar_categorias(preguntas):
-    """Función para contar las categorías disponibles"""
-    categorias = defaultdict(int)
-    for cat in preguntas:
-        categorias[cat['CATEGORIA']] += 1
-    return categorias
+time.sleep(1)
+#PRESENTANDO
+print(GREEN + "\nHermoso nombre 😎 ", nombre, "\n" + RESET)
+time.sleep(1)
+print("", nombre, "te dare", puntaje, "puntos para que puedas empezar\n")
 
+#INSTRUCCIONES
+time.sleep(1)
+print(BLUE + "Cargando Instrucciónes ... " + RESET)
+time.sleep(2)
+print(
+    YELLOW +
+    """Bien ahora responda las siguientes preguntas escribiendo la letra de la alternativa y presionando 'Enter' para enviar tu respuesta\n"""
+    + RESET)
 
-def crear_lista_preguntas(questions):
-    """Función para ordenar preguntas en una lista"""
-    lista_preguntas = []
-    for q in questions:
-        nueva_pregunta = Question(q["PREGUNTAS"], q["RESPUESTAS"], q["CATEGORIA"])
-        lista_preguntas.append(nueva_pregunta)
-    return lista_preguntas
+time.sleep(1)
 
-def ronda_preguntas(teams, questions, q_archive):
-    """Función del juego"""
-    categories = mostrar_categorias(q_archive)
-    while len(questions) > 0: # loop infinito, borrar preguntas conforme avanza
-        for t in teams:
-            # código del juego
-            sleep(1)
-            print(f"\nEs el turno de: {t}\n")
-            print("Estas son las categorías disponibles:\n")
-            print(murci())
-            for cat, num in categories.items():
-                print(f"\n{cat} (preguntas: {num})")
-            print(murci())
-            print(f"\n{t.nombre}, elijan una categoría.\n")
-            while True:
-                chosen = input("Su elección: ").title().strip()
-                if chosen in categories:
-                    print (f"\n{t.nombre} ha elegido {chosen}. ._.)/\(._. \n")
-                    break
-                else: 
-                    print("\n¡Elijan una categoría disponible! (=____=) \n")
-            timer_3()
-            lista_actual = [q for q in questions if q.categoria == chosen]
-            pregunta = lista_actual[0]
-            print(f"\n{pregunta.pregunta}\n")
-            timer_60()
-            print(f"\nLa respuesta correcta es: {pregunta.respuesta}")
-            guess = adivinaron()
-            if guess == "s":
-                t.add_points(pregunta.puntos)
-                print(f"\n¡Bien ahí, {t.nombre}! Ganaron {pregunta.puntos} puntos. =^_^=")
-            elif guess == "n": 
-                print("\nSuerte para la próxima. @^@")
-            questions.remove(pregunta)
-            categories[chosen] -= 1
-            if categories[chosen] == 0:
-                del categories[chosen]
-            if len(questions) == 0:
-                break
-    # código de finalización, no más preguntas
-    print("Se terminaron las preguntas.")
-    team_list = sorted(teams, key=lambda x: x.puntos)
-    print("	[¬º-°]¬ Resultado final:\n")
-    for t in team_list:
-        print(f"{t.nombre}, puntos totales: {t.puntos}\n")
-    print(f"*\(^o^)/* ¡Felicidades, {team_list[0].nombre}! *\(^o^)/* \n")
-    print(murci() * 4)
-    print(figlet_format(team_list[0].nombre))
-    print(murci() * 4)
-    theme()
+import time
+#COMPENZAR TRIVIA
+time.sleep(1)
+print(CYAN + "\nComenzando la trivia en \n3" + RESET)
+time.sleep(1)
+print(CYAN + "2" + RESET)
+time.sleep(1)
+print(CYAN + "1" + RESET)
+print(YELLOW + """
+.--.
+|__| .-------.
+|=.| |.-----.|
+|--| ||START||
+|  | |'-----'|
+|__|~')_____('  
+""" + RESET)
+time.sleep(1)
+print(CYAN + "\nLa trivia ha comenzado...\n" + RESET)
+time.sleep(2)
+while iniciar_trivia == True:  #  Mientras iniciar_trivia sea True, repite:
+    intentos += 1
+    puntaje = 0
 
-    
+    #PREGUNTA1
 
-preguntas = leer_preguntas("preguntas.csv")
+    print(MAGENTA +
+          "1. ¿En qué año se desarrolló el lenguaje de programación C?" +
+          RESET)
+    print("a) 1968")
+    print("b) 1970")
+    print("c) 1972")
+    print("d) 1971")
+    #INGRESAR RESPUESTA
+    respuesta_1 = input(BLUE + "Ingresa tu respuesta: " + RESET)
+    # RESPUESTA INVALIDA
+    while respuesta_1 not in ("a", "b", "c", "d"):
+        print(RED + "\nRespuesta invalida:" + RESET)
+        print("Debes responder a, b, c o d.")
+        respuesta_1 = input(BLUE + "Ingresa nuevamente tu respuesta: " + RESET)
 
+#VERIFICAR RESPUESTA
+    if respuesta_1 == "c":
+        puntaje += random.randint(5, 10)
+        print(RC)
+    else:
+        print(RI)
+        puntaje -= random.randint(1, 5)
 
-theme()
+    print(
+        YELLOW +
+        """ C fue creado en 1972 por Dennis M. Ritchie en los Laboratorios Bell como evolución del anterior lenguaje B."""
+        + RESET)
+    #PUNTOS ACUMULADOS
+    time.sleep(1)
+    print(GREEN + "Acumulaste", puntaje, "puntos\n\n" + RESET)
 
-equipos = cantidad_equipos()
+    #PREGUNTA 2
+    time.sleep(2)
+    print(
+        MAGENTA +
+        "2. ¿Recuerdas cuál fue la contraseña para los controles informáticos durante 8 años de los misiles nucleares estadounidenses?"
+        + RESET)
+    print("a) 12345678")
+    print("b) 00000000")
+    print("c) qwerty123")
+    print("d) @W#)hfl~4")
 
-lista_preguntas = crear_lista_preguntas(preguntas)
+    #INGRESAR RESPUESTA
+    respuesta_2 = input(BLUE + "Ingresa tu respuesta: " + RESET)
 
-ronda_preguntas(equipos, lista_preguntas, preguntas)
+    #RESPUESTA INVALIDA
+    while respuesta_2 not in ("a", "b", "c", "d"):
+        print(RED + "\nRespuesta invalida:" + RESET)
+        print("Debes responder a, b, c o d.")
+        respuesta_2 = input(BLUE + "Ingresa nuevamente tu respuesta: " + RESET)
+
+#VERIFICAR RESPUESTA
+    if respuesta_2 == "b":
+        puntaje += random.randint(5, 10)
+        print(RC)
+    else:
+        print(RI)
+        puntaje -= random.randint(1, 5)
+    print(
+        YELLOW +
+        """ Así es, esta era la contraseña “súper segura” que estuvo ocho años activa y que daba acceso al control informático de las cabezas nucleares de Estados Unidos."""
+        + RESET)
+
+    #PUNTOS ACUMULADOS
+    time.sleep(1)
+    print(GREEN + "Acumulaste", puntaje, "puntos\n\n" + RESET)
+
+    time.sleep(2)
+
+    #PREGUNTA 3
+    print(
+        MAGENTA +
+        "3. La primera unidad de disco duro de 1 GB se anunció en 1980, pesaba alrededor de 250 kilos y tenía costaba 40.000 dólares."
+        + RESET)
+    print("a) Verdadero")
+    print("b) Falso")
+    #INGRESAR RESPUESTA
+    respuesta_3 = input(BLUE + "Ingresa tu respuesta: " + RESET)
+
+    #RESPUESTA INVALIDA
+    while respuesta_3 not in ("a", "b"):
+        print(RED + "\nRespuesta invalida:" + RESET)
+        print("Debes responder a o b")
+        respuesta_3 = input(BLUE + "Ingresa nuevamente tu respuesta: " + RESET)
+
+#VERIFICAR RESPUESTA
+    if respuesta_3 == "a":
+        puntaje += random.randint(5, 10)
+        print(RC)
+    else:
+        print(RI)
+        puntaje -= random.randint(1, 5)
+    print(YELLOW + """La respuesta correcta es: Verdadero. ¡Así es!""" + RESET)
+
+    #PUNTOS ACUMULADOS
+    time.sleep(1)
+    print(GREEN + "Acumulaste", puntaje, "puntos\n\n" + RESET)
+
+    time.sleep(2)
+
+    #PREGUNTA 4
+    print(
+        MAGENTA +
+        "4. Un medio de codificación de texto en el que cada símbolo está representado por 16 bits es..."
+        + RESET)
+    print("a) LZW")
+    print("b) ASCII")
+    print("c) Unicode")
+    print("d) Code")
+    #INGRESAR RESPUESTA
+    respuesta_4 = input(BLUE + "Ingresa tu respuesta: " + RESET)
+
+    #RESPUESTA INVALIDA
+    while respuesta_4 not in ("a", "b", "c", "d"):
+        print(RED + "\nRespuesta invalida:" + RESET)
+        print("Debes responder a, b, c o d.")
+        respuesta_4 = input(BLUE + "Ingresa nuevamente tu respuesta: " + RESET)
+
+#VERIFICAR RESPUESTA
+    if respuesta_4 == "c":
+        puntaje += random.randint(5, 10)
+        print(RC)
+    else:
+        print(RI)
+        puntaje -= random.randint(1, 5)
+    print(
+        YELLOW +
+        """ La respuesta correcta es: Unicode es un sistema de codificación informático que tiene como objetivo unificar los intercambios de texto a nivel internacional. Cada carácter se describe con un nombre y un código que lo identifica de manera única, independientemente del medio informático o el software utilizado."""
+        + RESET)
+
+    #RESULTADO
+    time.sleep(2)
+    print(CYAN + "\n\n\n¡WOW ", nombre, "tu resultado es", puntaje,
+          "puntos" + RESET)
+
+    time.sleep(2)
+    numero = int(input(BLUE + "\nIngresa tu número de la suerte: " + RESET))
+    print(CYAN + "\nSu resultado final es: ", puntaje * numero,
+          "\n\nGracias por jugar mi trivia!\n" + RESET)
+    time.sleep(2)
+    print(MAGENTA + "\n¿Deseas intentar la trivia nuevamente?" + RESET)
+    repetir_trivia = input(
+        "Ingresa 'si' para repetir, o cualquier tecla para finalizar:\n "
+    ).lower()
+
+    if repetir_trivia != "si":  # != significa "distinto"
+        print("\nNos vemos pronto", nombre, " y tome agua!")
+        iniciar_trivia = False
